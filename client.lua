@@ -1,11 +1,11 @@
 local isPlacingObject = false
-local ObjectModel = "xm_base_cia_server_01" -- Change this to the model of the object you want to place
 local placingObject = nil
 local rotationSpeed = 5.0  -- Adjust the rotation speed as needed
 local objectHeading = 0
 
 -- Function to start object placement loop
-local function StartObjectPlacement()
+local function StartObjectPlacement(ObjectModel)
+    local ObjectModel = ObjectModel
     Citizen.CreateThread(function()
         while true do
             Citizen.Wait(0)
@@ -43,6 +43,7 @@ local function StartObjectPlacement()
                     break
                 elseif IsControlPressed(0, 44) then -- Key: Q
                     DeleteEntity(placingObject)
+                    TaskExitCover()
                     break
                 end
             else
@@ -54,10 +55,14 @@ end
 
 -- Event handler to trigger object placement
 RegisterNetEvent('StartObjectPlacement')
-AddEventHandler('StartObjectPlacement', function()
+AddEventHandler('StartObjectPlacement', function(ObjectModel)
+    local ObjectModel = ObjectModel
     if not isPlacingObject then
         isPlacingObject = true
-        StartObjectPlacement()
         TaskExitCover()
+        StartObjectPlacement(ObjectModel)
     end
 end)
+
+-- server 1 "xm_base_cia_server_01"
+--TriggerEvent('StartObjectPlacement', "xm_base_cia_server_01")
