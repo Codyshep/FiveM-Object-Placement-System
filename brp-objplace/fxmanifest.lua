@@ -5,7 +5,7 @@ lua54 'yes'
 
 author 'EagleDev'
 description 'None'
-version '1.0.0'
+version '0.0.2'
 
 server_scripts {
     '@oxmysql/lib/MySQL.lua',
