@@ -24,7 +24,7 @@ local function showPlacementHelp()
             if previous_input == 2 then
                 helpText = "Press Scroll Up/Down to Rotate\nPress Enter to Place Object\nPress Q to Cancel Placement"
             else
-                helpText = "Use DPad Up/Down to Rotate\nPress A to Place Object\nPress B to Cancel Placement"
+                helpText = "Use DPad Left/Right to Rotate\nPress A to Place Object\nPress LB to Cancel Placement"
             end
             ClearAllHelpMessages() -- Clear existing help messages
             DisplayHelpText(helpText)
@@ -39,7 +39,7 @@ local function showPlacementHelp()
                     if current_input == 2 then
                         helpText = "Press Scroll Up/Down to Rotate\nPress Enter to Place Object\nPress Q to Cancel Placement"
                     else
-                        helpText = "Use DPad Up/Down to Rotate\nPress A to Place Object\nPress B to Cancel Placement"
+                        helpText = "Use DPad Left/Right to Rotate\nPress A to Place Object\nPress LB to Cancel Placement"
                     end
                     
                     ClearAllHelpMessages() -- Clear existing help messages
@@ -114,7 +114,7 @@ local function StartObjectPlacement(ObjectModel)
                     print("Failed To Place Server")
                 end
                 break
-            elseif IsControlPressed(0, 44) then -- Key: Q
+            elseif IsControlPressed(0, 205) then -- Key: Q | Controller: Left Bumper
                 -- Cancel placement
                 print("Placement Canceled")
                 DeleteEntity(objectHologram)
