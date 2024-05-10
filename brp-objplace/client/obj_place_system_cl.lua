@@ -121,7 +121,6 @@ local function StartObjectPlacement(ObjectModel, PlacementHeight)
                         FreezeEntityPosition(placedObject, true)  -- Freeze the object in place
                         DeleteEntity(objectHologram) -- Delete hologram after placing object
                         hidePlacementHelp()
-                        DisablePlayerFiring(player, false)-- Re-enable combat
                     else
                         print("Failed To Place")
                     end
@@ -131,7 +130,6 @@ local function StartObjectPlacement(ObjectModel, PlacementHeight)
                     DeleteEntity(objectHologram)
                     clearLocalPlacingData()
                     hidePlacementHelp()
-                    DisablePlayerFiring(player, false)-- Re-enable combat
                 end
                 break
             end
@@ -147,13 +145,5 @@ AddEventHandler('PlaceProp', function(ObjectModel, PlacementHeight)
     if not isPlacingObject then
         isPlacingObject = true
         StartObjectPlacement(ObjectModel, PlacementHeight)
-    end
-end)
-
-Citizen.CreateThread(function()
-    local player = PlayerPedId()
-    while isPlacingObject do
-        Citizen.Wait(0)
-        DisablePlayerFiring(player, true)
     end
 end)
