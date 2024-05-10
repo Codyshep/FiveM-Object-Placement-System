@@ -22,9 +22,9 @@ local function showPlacementHelp()
             
             -- Show initial help text
             if previous_input == 2 then
-                helpText = "Press Scroll Up/Down to Rotate\nPress Enter to Place Object\nPress Q to Cancel Placement"
+                helpText = "Press Scroll Up/Down to Rotate\nPress Enter to Place Object\nPress Backspace to Cancel Placement"
             else
-                helpText = "Use DPad Left/Right to Rotate\nPress A to Place Object\nPress LB to Cancel Placement"
+                helpText = "Use DPad Left/Right to Rotate\nPress A to Place Object\nPress B to Cancel Placement"
             end
             ClearAllHelpMessages() -- Clear existing help messages
             DisplayHelpText(helpText)
@@ -37,9 +37,9 @@ local function showPlacementHelp()
                     previous_input = current_input
                     
                     if current_input == 2 then
-                        helpText = "Press Scroll Up/Down to Rotate\nPress Enter to Place Object\nPress Q to Cancel Placement"
+                        helpText = "Press Scroll Up/Down to Rotate\nPress Enter to Place Object\nPress Backspace to Cancel Placement"
                     else
-                        helpText = "Use DPad Left/Right to Rotate\nPress A to Place Object\nPress LB to Cancel Placement"
+                        helpText = "Use DPad Left/Right to Rotate\nPress A to Place Object\nPress B to Cancel Placement"
                     end
                     
                     ClearAllHelpMessages() -- Clear existing help messages
@@ -65,15 +65,23 @@ local function roundToNearestStep(number, stepSize)
     return math.floor(number / stepSize + 0.5) * stepSize
 end
 
+local function handlePlacementControls()
+    if IsControlPressed(0, 15) then -- Scroll Up | Controller: DPAD UP
+        objectHeading = objectHeading + rotationSpeed
+    elseif IsControlPressed(0, 14) then -- Scroll Down | Controller: DPAD DOWN
+        objectHeading = objectHeading - rotationSpeed
+    elseif IsControlPressed(0, 191) then -- Key: Enter | Controller: A
+        return true -- Finalize placement
+    elseif IsControlPressed(0, 177) then -- Key: Backspace | Controller: B
+        return false -- Cancel placement
+    end
+    return nil
+end
 
 -- Function to start object placement loop
 local function StartObjectPlacement(ObjectModel, PlacementHeight)
-
-    local PlacementHeight = PlacementHeight
-    if PlacementHeight == nil then
-        PlacementHeight = 0
-    end
-
+    local PlacementHeight = PlacementHeight or 0
+    local snappedX, snappedY
     local player = PlayerPedId()
     local ObjectModel = ObjectModel
     local ObjectHash = GetHashKey(ObjectModel)
@@ -94,39 +102,37 @@ local function StartObjectPlacement(ObjectModel, PlacementHeight)
         
         if hitCoords ~= vec3(0, 0, 0) then
             -- Update hologram position
-            local snappedX = roundToNearestStep(hitCoords.x, stepSize)
-            local snappedY = roundToNearestStep(hitCoords.y, stepSize)
+            snappedX = roundToNearestStep(hitCoords.x, stepSize)
+            snappedY = roundToNearestStep(hitCoords.y, stepSize)
             SetEntityCoordsNoOffset(objectHologram, snappedX, snappedY, hitCoords.z + PlacementHeight, true, true, true)
             SetEntityHeading(objectHologram, objectHeading)
             
-            -- Rotate the hologram object using scroll wheel input
-            if IsControlPressed(0, 15) then -- Scroll Up | Controller: DPAD UP
-                objectHeading = objectHeading + rotationSpeed
-            elseif IsControlPressed(0, 14) then -- Scroll Down | Controller: DPAD DOWN
-                objectHeading = objectHeading - rotationSpeed
-            elseif IsControlPressed(0, 191) then -- Key: Enter | Controller: A
-                -- Finalize placement
-                local placedObject = CreateObject(ObjectHash, snappedX, snappedY, hitCoords.z, true, true, true)
-                if placedObject then
-                    print("Placed Object: "..ObjectModel.." With A Hash Of: "..ObjectHash)
-                    SetEntityCollision(placedObject, true, true)
-                    ResetEntityAlpha(placedObject)  -- Make the object fully visible
-                    SetEntityHeading(placedObject, objectHeading) -- Sets Object Heading
-                    FreezeEntityPosition(placedObject, true)  -- Freeze the object in place
-                    DeleteEntity(objectHologram) -- Delete hologram after placing object
+            local controlResult = handlePlacementControls()
+            if controlResult ~= nil then
+                if controlResult then
+                    -- Finalize placement
+                    local placedObject = CreateObject(ObjectHash, snappedX, snappedY, hitCoords.z, true, true, true)
+                    PlaceObjectOnGroundProperly(ObjectHash)
+                    if placedObject then
+                        print("Placed Object: "..ObjectModel.." With A Hash Of: "..ObjectHash)
+                        SetEntityCollision(placedObject, true, true)
+                        ResetEntityAlpha(placedObject)  -- Make the object fully visible
+                        SetEntityHeading(placedObject, objectHeading) -- Sets Object Heading
+                        FreezeEntityPosition(placedObject, true)  -- Freeze the object in place
+                        DeleteEntity(objectHologram) -- Delete hologram after placing object
+                        hidePlacementHelp()
+                        DisablePlayerFiring(player, false)-- Re-enable combat
+                    else
+                        print("Failed To Place")
+                    end
+                else
+                    -- Cancel placement
+                    print("Placement Canceled")
+                    DeleteEntity(objectHologram)
+                    clearLocalPlacingData()
                     hidePlacementHelp()
                     DisablePlayerFiring(player, false)-- Re-enable combat
-                else
-                    print("Failed To Place Server")
                 end
-                break
-            elseif IsControlPressed(0, 205) then -- Key: Q | Controller: Left Bumper
-                -- Cancel placement
-                print("Placement Canceled")
-                DeleteEntity(objectHologram)
-                clearLocalPlacingData()
-                hidePlacementHelp()
-                DisablePlayerFiring(player, false)-- Re-enable combat
                 break
             end
         end
@@ -135,18 +141,13 @@ local function StartObjectPlacement(ObjectModel, PlacementHeight)
     clearLocalPlacingData()
 end
 
-
 -- Event handler to trigger object placement
 RegisterNetEvent('PlaceProp')
 AddEventHandler('PlaceProp', function(ObjectModel, PlacementHeight)
-
-    local PlacementHeight = PlacementHeight
-    local ObjectModel = ObjectModel
     if not isPlacingObject then
         isPlacingObject = true
         StartObjectPlacement(ObjectModel, PlacementHeight)
     end
-
 end)
 
 Citizen.CreateThread(function()
