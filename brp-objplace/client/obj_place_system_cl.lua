@@ -67,7 +67,13 @@ end
 
 
 -- Function to start object placement loop
-local function StartObjectPlacement(ObjectModel)
+local function StartObjectPlacement(ObjectModel, PlacementHeight)
+
+    local PlacementHeight = PlacementHeight
+    if PlacementHeight == nil then
+        PlacementHeight = 0
+    end
+
     local player = PlayerPedId()
     local ObjectModel = ObjectModel
     local ObjectHash = GetHashKey(ObjectModel)
@@ -90,7 +96,7 @@ local function StartObjectPlacement(ObjectModel)
             -- Update hologram position
             local snappedX = roundToNearestStep(hitCoords.x, stepSize)
             local snappedY = roundToNearestStep(hitCoords.y, stepSize)
-            SetEntityCoordsNoOffset(objectHologram, snappedX, snappedY, hitCoords.z, true, true, true)
+            SetEntityCoordsNoOffset(objectHologram, snappedX, snappedY, hitCoords.z + PlacementHeight, true, true, true)
             SetEntityHeading(objectHologram, objectHeading)
             
             -- Rotate the hologram object using scroll wheel input
@@ -129,14 +135,18 @@ local function StartObjectPlacement(ObjectModel)
     clearLocalPlacingData()
 end
 
+
 -- Event handler to trigger object placement
 RegisterNetEvent('PlaceProp')
-AddEventHandler('PlaceProp', function(ObjectModel)
+AddEventHandler('PlaceProp', function(ObjectModel, PlacementHeight)
+
+    local PlacementHeight = PlacementHeight
     local ObjectModel = ObjectModel
     if not isPlacingObject then
         isPlacingObject = true
-        StartObjectPlacement(ObjectModel)
+        StartObjectPlacement(ObjectModel, PlacementHeight)
     end
+
 end)
 
 Citizen.CreateThread(function()
