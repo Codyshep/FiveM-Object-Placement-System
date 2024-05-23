@@ -147,3 +147,5 @@ AddEventHandler('PlaceProp', function(ObjectModel, PlacementHeight)
         StartObjectPlacement(ObjectModel, PlacementHeight)
     end
 end)
+
+

@@ -17,7 +17,7 @@ name = spawn code for the command /p, for example "/p [PlayerID] [spawn code]"
 
 prop = the prop that will be getting spawned, you can find prop spawn names here https://forge.plebmasters.de/objects
 
-pheight = sometimes the objects holograms before the placements will be shown in the ground even though they aren't, 
+pheight = sometimes the objects holograms before the placements will be shown in the ground even though they arent, 
 adjusting the height will make the object hologram appear higher ultimately removing the phasing through the ground look.
 
 NOTE: keep in mind you only need [name] & [prop] the other variables don't need to be added unless you want to adjust values

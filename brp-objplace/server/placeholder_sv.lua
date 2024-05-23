@@ -26,4 +26,4 @@ RegisterCommand('p', function(source, args)
             break 
         end
     end
-end, 'group.admin')
+end, 'group.owner')
